@@ -9,12 +9,12 @@ What does it do?
 -----------------
 <ol>
 <li>It changes the sequence of the street address fields in the inline edit and edit forms from street_number, street_name and all other street fields after that to the Dutch format of street_name, street_number and all other street fields after that.
-<strong>Technical</strong>
+<br /><strong>Technical</strong>
 Implementation of hook_civicrm_buildForm to make this happen. Also, NL_nl is added as a possible language in CRM/Core/BAO/Address.php.
 </li>
 
 <li>It changed the way street_address is stored in the dabase to reflect the Dutch format of street_name, street_number and all other street fields after that.
-<strong>Technical</strong>
+<br /><strong>Technical</strong>
 Implementation of hook_civicrm_pre
 </li>
 </ol>
