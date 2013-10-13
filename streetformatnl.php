@@ -1,5 +1,5 @@
 <?php
-
+ini_set('display_errors', '1');
 require_once 'streetformatnl.civix.php';
 
 /**
@@ -79,7 +79,7 @@ function streetformatnl_civicrm_enable() {
      */
     $addressNlParams = array('country_id' => 1152);
     try {
-        $apiAddressesNl = civicrm_api3('contact', 'get', $addressNlParams);
+        $apiAddressesNl = civicrm_api3('address', 'get', $addressNlParams);
     }
     catch (CiviCRM_API3_Exception $e) {
     }
@@ -91,7 +91,7 @@ function streetformatnl_civicrm_enable() {
      */
     $addressBeParams = array('country_id' => 1020);
     try {
-        $apiAddressesBe = civicrm_api3('contact', 'get', $addressBeParams);
+        $apiAddressesBe = civicrm_api3('address', 'get', $addressBeParams);
     }
     catch (CiviCRM_API3_Exception $e) {
     }
@@ -109,8 +109,7 @@ function streetformatnl_civicrm_enable() {
                     if (!isset($address['street_number']) || empty($address['street_number'])) {                    
                         $apiAddressParts = explode(" ", $address['street_address']);
                         if (isset($apiAddressParts[1])) {
-                            require_once 'CRM/Core/BAO/Address.php';
-                            $parsedParts = CRM_Core_BAO_Address::parseStreetAddress($address['street_address'], 'en_US');
+                            $parsedParts = _splitStreetAddressNl($address['street_address']);
                             if (isset($parsedParts['street_name'])) {
                                 $address['street_name'] = $parsedParts['street_name'];
                             }
@@ -124,7 +123,7 @@ function streetformatnl_civicrm_enable() {
                     }
                 }
                 /*
-                 * glue the address together in Dutch format
+                 * glue the address together in Dutch format if applicable
                  */
                 $glueParams = array();
                 $apiUpdateParams = array('id' => $addressKey);
@@ -141,7 +140,7 @@ function streetformatnl_civicrm_enable() {
                     $apiUpdateParams['street_unit'] = $address['street_unit'];
                 }
                 if (!empty($glueParams)) {
-                    $apiUpdateParams['street_address'] = self::_glueStreetAddressNl($glueParams);
+                    $apiUpdateParams['street_address'] = _glueStreetAddressNl($glueParams);
                 }
                 /*
                  * update address with new values using API
@@ -240,15 +239,11 @@ function _splitStreetAddressNl($streetAddress) {
              *   is true) it is assumed this is part of the street_unit
              */
             if (is_numeric($addressPart)) {
-                if($partKey == 0) {
-                    $streetName .= $addressPart;
+                if ($foundStreetNumber == false) {
+                    $streetNumber = $addressPart;
+                    $foundStreetNumber = true;
                 } else {
-                    if ($foundStreetNumber == false) {
-                        $streetNumber = $addressPart;
-                        $foundStreetNumber = true;
-                    } else {
-                        $streetUnit .= " ".$addressPart;
-                    }
+                    $streetUnit .= " ".$addressPart;
                 }
             } else {
                 /*
