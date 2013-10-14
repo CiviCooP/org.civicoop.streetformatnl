@@ -5,8 +5,11 @@ CiviCRM extension to change the street_address parsing to Dutch format (street_n
 
 It only makes sense to enable this extension if the CiviCRM setting 'street address parsing' is checked. This setting can be found at Administer/Localization/Address Settings (or in Dutch"Beheren/Lokalisatie/Adresformaten) AND if the local language is set to Dutch (nl_NL)
 Also, the assumption is that either Netherlands or Belgium is set as the default country. The parsing in Dutch format will happen only for those contacts that are located in either Netherlands or Belgium.
-There will not be an error when Netherlands or Belgium is not the default country, and nothing will go wrong. It just means that there might be addresses in your database that actually would need parsing in Dutch format, but that will not happen because the country is empty.
-So if you have addresses in your database that need formatting in the Dutch way but have no country_id, make sure that they have the expected country id (1152 for Netherlands and 1020 for Belgium)
+
+Please note that the extension does not convert existing street_addresses in your database! It assumes you either install this extension in a 
+clean install or update your existing street_addresses in your database using MySQL. At least, if you have switched on street_parsing
+with an empty CiviCRM database, you will have street_names, street_numbers etc. in your database. You can just add those together in 
+the right sequence to update your existing street_addresses.
 
 What does it do?
 -----------------

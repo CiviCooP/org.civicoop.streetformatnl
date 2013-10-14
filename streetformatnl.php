@@ -3,9 +3,35 @@ ini_set('display_errors', '1');
 require_once 'streetformatnl.civix.php';
 
 /**
+ * Implementation of hook_civicrm_pre
+ * 
+ * make sure street_address, street_name, street_number and street_unit are displayed
+ * correctly when address in The Netherlands or Belgium
+ */
+function streetformatnl_civicrm_pre($op, $objectName, $objectId, &$objectRef) {
+    if ($objectName == "Address") {
+        if (isset($objectRef['country_id'])) {
+            if ($objectRef['country_id'] == 1152 || $objectRef['country_id'] == 1020) {
+                /*
+                 * glue if street_name <> empty, split otherwise if street_address not empty
+                 */
+                if (isset($objectRef['street_name']) && !empty($objectRef['street_name'])) {
+                    $glueParams['street_name'] = $objectRef['street_name'];
+                    if (isset($objectRef['street_number'])) {
+                        $glueParams['street_number'] = $objectRef['street_number'];
+                    }
+                    if (isset($glueParams['street_unit'])) {
+                        $glueParams['street_unit'] = $objectRef['street_unit'];
+                    }
+                    $objectRef['street_address'] = _glueStreetAddressNl($glueParams);
+                }                
+            }
+        }
+    }
+}
+/**
  * Implementation of hook_civicrm_buildForm
  * 
- * change sequence for street elements if config language is NL_nl
  * @author Erik Hommel (erik.hommel@civicoop.org)
  * 
  */
@@ -73,86 +99,6 @@ function streetformatnl_civicrm_uninstall() {
  */
 
 function streetformatnl_civicrm_enable() {
-    $toBeParsedAddresses = array();
-    /*
-     * first select addresses in Netherlands
-     */
-    $addressNlParams = array('country_id' => 1152);
-    try {
-        $apiAddressesNl = civicrm_api3('address', 'get', $addressNlParams);
-    }
-    catch (CiviCRM_API3_Exception $e) {
-    }
-    if (isset($apiAddressesNl['values'])) {
-        $toBeParsedAddresses = $apiAddressesNl['values'];
-    }
-    /*
-     * then add addresses in Belgium
-     */
-    $addressBeParams = array('country_id' => 1020);
-    try {
-        $apiAddressesBe = civicrm_api3('address', 'get', $addressBeParams);
-    }
-    catch (CiviCRM_API3_Exception $e) {
-    }
-    if (isset($apiAddressesBe['values'])) {
-        array_merge($toBeParsedAddresses, $apiAddressesBe['values']);
-    }
-    if (!empty($toBeParsedAddresses)) {
-        foreach ($toBeParsedAddresses as $addressKey => $address) {
-            /*
-             * check if street_name and street_number both have values. If not, 
-             * and street_address does have more than one unbroken string, split the address first
-             */
-            if (isset($address['street_address']) && !empty($address['street_address'])) {
-                if (!isset($address['street_name']) || empty($address['street_name'])) {
-                    if (!isset($address['street_number']) || empty($address['street_number'])) {                    
-                        $apiAddressParts = explode(" ", $address['street_address']);
-                        if (isset($apiAddressParts[1])) {
-                            $parsedParts = _splitStreetAddressNl($address['street_address']);
-                            if (isset($parsedParts['street_name'])) {
-                                $address['street_name'] = $parsedParts['street_name'];
-                            }
-                            if (isset($parsedParts['street_number'])) {
-                                $address['street_number'] = $parsedParts['street_number'];
-                            }
-                            if (isset($parsedParts['street_unit'])) {
-                                $address['street_unit'] = $parsedParts['street_unit'];
-                            }
-                        }
-                    }
-                }
-                /*
-                 * glue the address together in Dutch format if applicable
-                 */
-                $glueParams = array();
-                $apiUpdateParams = array('id' => $addressKey);
-                if (isset($address['street_name'])) {
-                    $glueParams['street_name'] = $address['street_name'];
-                    $apiUpdateParams['street_name'] = $address['street_name'];
-                    }
-                if (isset($address['street_number'])) {
-                    $glueParams['street_number'] = $address['street_number'];
-                    $apiUpdateParams['street_number'] = $address['street_number'];
-                }
-                if (isset($address['street_unit'])) {
-                    $glueParams['street_unit'] = $address['street_unit'];
-                    $apiUpdateParams['street_unit'] = $address['street_unit'];
-                }
-                if (!empty($glueParams)) {
-                    $apiUpdateParams['street_address'] = _glueStreetAddressNl($glueParams);
-                }
-                /*
-                 * update address with new values using API
-                 */
-                try {
-                    civicrm_api3('address', 'update', $apiUpdateParams);                    
-                }
-                catch (CiviCRM_API3_Exception $e) {
-                }
-            }
-        }
-    }
   return _streetformatnl_civix_civicrm_enable();
 }
 
@@ -258,7 +204,11 @@ function _splitStreetAddressNl($streetAddress) {
                  *   - if the first digit is not numeric, put the lot into streetName
                  */
                 if ($foundStreetNumber == true) {
-                    $streetUnit .= " ".$addressPart;
+                    if (!empty($streetName)) {
+                        $streetUnit .= " ".$addressPart;
+                    } else {
+                        $streetName .= " ".$addressPart;
+                    }
                 } else {
                     if ($partKey == 0) {
                         $streetName .= $addressPart;
@@ -283,6 +233,10 @@ function _splitStreetAddressNl($streetAddress) {
         $result['street_name'] = trim($streetName);
         $result['street_number'] = $streetNumber;
         $result['street_unit'] = trim($streetUnit);
+        /*
+         * if we still have no street_number, add contact to checkgroup
+         */
+        
     }
     return $result;
 }
