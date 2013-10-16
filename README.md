@@ -17,6 +17,7 @@ What does it do?
 <li>It changes the sequence of the street address fields in the inline edit and edit forms from street_number, street_name and all other street fields after that to the Dutch format of street_name, street_number and all other street fields after that.
 <br /><strong>Technical</strong>
 Modified template <em>CRM/Contact/Form/Edit/Address/street_address.tpl</em>. Also, nl_NL is added as a possible language in <em>CRM/Core/BAO/Address.php</em>.
+And the hook <em>hook_civicrm_buildForm</em> is used to split and glue street_address before displaying
 </li>
 
 <li>It changed the way street_address is stored in the dabase to reflect the Dutch format of street_name, street_number and all other street fields after that.
