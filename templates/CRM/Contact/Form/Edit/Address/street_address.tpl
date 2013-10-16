@@ -22,12 +22,11 @@
  | GNU Affero General Public License or the licensing of CiviCRM,     |
  | see the CiviCRM license FAQ at http://civicrm.org/licensing        |
  +--------------------------------------------------------------------+
- | Changed for CiviCRM extension org.civicoop.streetformatnl          |
- | Author : Erik Hommel (erik.hommel@civicoop.org)                    |
- | Change sequence of street address names to name/number/unit        |
- | (check https://github.com/CiviCooP/org.civicoop.streetformatnl)    |
- | License: Academic Free License V3.0                                |
- +--------------------------------------------------------------------+
+ | Change for extension org.civicoop.streetformalnl                   |
+ | Erik Hommel (erik.hommel@civicoop.org / http://www.civicoop.org)   |
+ | Change sequence fields into street_name, street_number, street_unit|
+ | 16 Oct 2013, Academic Free License V3.0                            |
+ +--------------------------------------------------------------------+ 
 *}
 {if !empty($form.address.$blockId.street_address)}
     <tr id="streetAddress_{$blockId}">
@@ -35,7 +34,7 @@
            {$form.address.$blockId.street_address.label} {help id="id-street-address" file="CRM/Contact/Form/Contact.hlp"}<br />
            {$form.address.$blockId.street_address.html}
         {if $parseStreetAddress eq 1 && $action eq 2}
-           &nbsp;&nbsp;<a href="#" title="{ts}Edit Address Elements{/ts}" onClick="processAddressFields( 'addressElements' , '{$blockId}', 1 );return false;">{ts}Edit Address Elements{/ts}</a>
+           &nbsp;&nbsp;<a href="#" title="{ts}Edit Address Elements{/ts}" onClick="processAddressFields( 'addressElements' , '{$blockId}', 1, '{$form.address.$blockId.street_address.value}' );return false;">{ts}Edit Address Elements{/ts}</a>
            {help id="id-edit-street-elements" file="CRM/Contact/Form/Contact.hlp"}
         {/if}
         </td>
@@ -56,7 +55,8 @@
                <td colspan="2">
                   {$form.address.$blockId.street_unit.label}<br />
                   {$form.address.$blockId.street_unit.html}
-                  <a href="#" title="{ts}Edit Street Address{/ts}" onClick="processAddressFields( 'streetAddress', '{$blockId}', 1 );return false;">{ts}Edit Complete Street Address{/ts}</a>
+                  
+                  <a href="#" title="{ts}Edit Street Address{/ts}" onClick="processAddressFields( 'streetAddress', '{$blockId}', 1, '{$form.address.$blockId.street_address.value}' );return false;">{ts}Edit Complete Street Address{/ts}</a>
                   {help id="id-edit-complete-street" file="CRM/Contact/Form/Contact.hlp"}
                </td>
            </tr>
@@ -65,7 +65,7 @@
 {if $parseStreetAddress eq 1}
 {literal}
 <script type="text/javascript">
-function processAddressFields( name, blockId, loadData ) {
+function processAddressFields( name, blockId, loadData, sourceStreetAddress ) {
 
   if ( loadData ) {
             var allAddressValues = {/literal}{if $allAddressFieldValues}{$allAddressFieldValues}{else}''{/if}{literal};
@@ -76,33 +76,33 @@ function processAddressFields( name, blockId, loadData ) {
       if (streetUnit === null) streetUnit = '';
       var streetNumber  = eval( "allAddressValues.street_number_"  + blockId );
       if (streetNumber === null) streetNumber = '';
-      var streetAddress = eval( "allAddressValues.street_address_" + blockId );
+      var streetAddress = sourceStreetAddress;
       if (streetAddress === null) streetAddress = '';
   }
 
-    if ( name == 'addressElements' ) {
-         if ( loadData ) {
+        if ( name == 'addressElements' ) {
+             if ( loadData ) {
             streetAddress = '';
-         }
+       }
 
-   cj('#addressElements_' + blockId).show();
-   cj('#streetAddress_' + blockId).hide();
+       cj('#addressElements_' + blockId).show();
+       cj('#streetAddress_' + blockId).hide();
   } else {
-    if ( loadData ) {
-        streetNumber = streetName = streetUnit = '';
-    }
+             if ( loadData ) {
+                  streetNumber = streetName = streetUnit = '';
+             }
 
-    cj('#streetAddress_' +  blockId).show();
-    cj('#addressElements_'+ blockId).hide();
- }
+             cj('#streetAddress_' +  blockId).show();
+             cj('#addressElements_'+ blockId).hide();
+       }
 
-// set the values.
-if ( loadData ) {
-    cj( '#address_' + blockId +'_street_name'    ).val( streetName    );
-    cj( '#address_' + blockId +'_street_unit'    ).val( streetUnit    );
-    cj( '#address_' + blockId +'_street_number'  ).val( streetNumber  );
-    cj( '#address_' + blockId +'_street_address' ).val( streetAddress );
-    }
+       // set the values.
+       if ( loadData ) {
+          cj( '#address_' + blockId +'_street_name'    ).val( streetName    );
+          cj( '#address_' + blockId +'_street_unit'    ).val( streetUnit    );
+          cj( '#address_' + blockId +'_street_number'  ).val( streetNumber  );
+          cj( '#address_' + blockId +'_street_address' ).val( streetAddress );
+       }
 }
 
 </script>

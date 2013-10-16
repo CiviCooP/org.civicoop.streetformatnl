@@ -13,17 +13,27 @@ function streetformatnl_civicrm_pre($op, $objectName, $objectId, &$objectRef) {
         if (isset($objectRef['country_id'])) {
             if ($objectRef['country_id'] == 1152 || $objectRef['country_id'] == 1020) {
                 /*
-                 * glue if street_name <> empty, split otherwise if street_address not empty
+                 * glue if street_name <> empty and street_number <> empty, split otherwise if street_address not empty
                  */
-                if (isset($objectRef['street_name']) && !empty($objectRef['street_name'])) {
+                if (!empty($objectRef['street_name']) && !empty($objectRef['street_number'])) {
                     $glueParams['street_name'] = $objectRef['street_name'];
-                    if (isset($objectRef['street_number'])) {
-                        $glueParams['street_number'] = $objectRef['street_number'];
-                    }
-                    if (isset($glueParams['street_unit'])) {
+                    $glueParams['street_number'] = $objectRef['street_number'];
+                    if (isset($objectRef['street_unit'])) {
                         $glueParams['street_unit'] = $objectRef['street_unit'];
                     }
                     $objectRef['street_address'] = _glueStreetAddressNl($glueParams);
+                } else {
+                    if (isset($objectRef['street_address']) && !empty($objectRef['street_address'])) {
+                        $streetParts = _splitStreetAddressNl($objectRef['street_address']);
+                        $objectRef['street_name'] = $streetParts['street_name'];
+                        if (isset($streetParts['street_number']) && !empty($streetParts['street_number'])) {
+                            $objectRef['street_number'] = $streetParts['street_number'];
+                        }
+                        if (isset($streetParts['street_unit']) && !empty($streetParts['street_unit'])) {
+                            $objectRef['street_unit'] = $streetParts['street_unit'];
+                        }
+                        $objectRef['street_address'] = _glueStreetAddressNl($streetParts);
+                    }
                 }                
             }
         }
@@ -36,29 +46,52 @@ function streetformatnl_civicrm_pre($op, $objectName, $objectId, &$objectRef) {
  * 
  */
 function streetformatnl_civicrm_buildForm($formName, &$form) {
-//    if ( $formName == "CRM_Contact_Form_Contact" || $formName == "CRM_Contact_Form_Inline_Address") {
+    if ( $formName == "CRM_Contact_Form_Contact" || $formName == "CRM_Contact_Form_Inline_Address") {
         /*
-         * check the language of the current installation and only do something if set to NL_nl
+         * check if any of the addresses of the contact are in Netherlands or Belgium and
+         * change the street_address sequence for those contact
          */
-//        $settingParams = array('return'=>'lcMessages');
-//        try{
-//            $settingApi = civicrm_api3('setting', 'getsingle', $settingParams);
-//        }
-//        catch (CiviCRM_API3_Exception $e) {
-//            $apiError = $e->getMessage();
-//            if (!isset($session)) {
-//                $session = CRM_Core_Session::singleton();
-//            }
-//            $session->setStatus("Unable to retrieve CiviCRM lcMessage setting with Setting API, check your configuration! Error from the API: $apiError", "Unable to retrieve CiviCRM language", 'error');
-//        }
-//        if (isset($settingApi['lcMessages'])) {
-//            if ($settingApi['lcMessages'] == "nl_NL") {
-//                
-//            }
-//        }
-//    }
+        $formValues = $form->getVar('_values');
+        $preEditValues = $form->getVar('_preEditValues');
+        if (isset($formValues['address'])) {
+            $formAddresses = $formValues['address'];
+        }
+        if (isset($preEditValues['address'])) {
+            $preEditAddresses['address'] = &$preEditValues['address'];
+        }
+        unset($formValues);
+        if (!empty($formAddresses)) {
+            foreach ($formAddresses as $addressElementId => $formAddress) {
+                $glueParams = array();
+                if (isset($formAddress['country_id'])) {
+                    if ($formAddress['country_id'] == 1152 || $formAddress['country_id' == 1020]) {
+                        /*
+                         * if only street_address filled, split and then glue
+                         */
+                        if (isset($formAddress['street_name'])) {
+                            $glueParams['street_name'] = $formAddress['street_name'];
+                        }
+                        if (isset($formAddress['street_number'])) {
+                            $glueParams['street_number'] = $formAddress['street_number'];
+                        }
+                        if (isset($formAddress['street_unit'])) {
+                            $glueParams['street_unit'] = $formAddress['street_unit'];
+                        }
+                        if (!empty($glueParams)) {
+                            $streetAddress = _glueStreetAddressNl($glueParams);
+                            if (!empty($streetAddress)) {
+                                $defaults['address'][$addressElementId]['street_address'] = $streetAddress;
+                                $preEditValues['address'][$addressElementId]['street_address'] = $streetAddress;
+                                $form->setDefaults( $defaults );
+                                $form->setVar('_preEditValues', $preEditValues);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
-
 /**
  * Implementation of hook_civicrm_config
  */
