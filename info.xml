@@ -10,11 +10,11 @@
   </maintainer>
   <releaseDate>2013-10-09</releaseDate>
   <version>1.0</version>
-  <develStage>alpha</develStage>
+  <develStage>stable</develStage>
   <compatibility>
     <ver>4.2</ver>
   </compatibility>
-  <comments>New module under development</comments>
+  <comments>Active stable module</comments>
   <civix>
     <namespace>CRM/Streetformatnl</namespace>
   </civix>
