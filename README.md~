@@ -25,7 +25,7 @@ And the hook <em>hook_civicrm_buildForm</em> is used to split and glue street_ad
 Implementation of <em>hook_civicrm_pre</em>
 </li>
 
-<li>There is a <strong>scheduled job</strong> called 'Parse NL and BE addresses' that will select all Dutch or Belgian addresses in the database where the <em>street_name</em> field is empty, and parse those. This will enable you to parse your addresses after an import action. The scheduled job is set to inactive when installed, you will have to make it active and then run it from the scheduled job list. You could leave it to run daily, but that should not be necessary. Advise is to set it back to inactive once it has run.
+<li>There is a <strong>scheduled job</strong> called 'Parse NL and BE addresses' that will select all Dutch or Belgian addresses in the database where the <em>street_name</em> field is empty, and parse those. This will enable you to parse your addresses after an import action.
 </li>
 </ol>
 

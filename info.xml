@@ -14,7 +14,7 @@
   <compatibility>
     <ver>4.2</ver>
   </compatibility>
-  <comments>New module under development</comments>
+  <comments>Extension is freely available but created for specific customer installations</comments>
   <civix>
     <namespace>CRM/Streetformatnl</namespace>
   </civix>
