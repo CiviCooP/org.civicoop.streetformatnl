@@ -64,7 +64,7 @@ function streetformatnl_civicrm_buildForm($formName, &$form) {
             foreach ($formAddresses as $addressElementId => $formAddress) {
                 $glueParams = array();
                 if (isset($formAddress['country_id'])) {
-                    if ($formAddress['country_id'] == 1152 || $formAddress['country_id' == 1020]) {
+                    if ($formAddress['country_id'] == 1152 || $formAddress['country_id'] == 1020) {
                         /*
                          * if only street_address filled, split and then glue
                          */
