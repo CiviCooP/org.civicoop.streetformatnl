@@ -1,9 +1,12 @@
 org.civicoop.streetformatnl
 ===========================
 
+**The current version of this extension is only compatible with CiviCRM 4.6 and 4.7.  
+Please use the 1.0 release (see the Releases tab) for CiviCRM 4.4.**
+
 CiviCRM extension to change the street_address parsing to Dutch format (street_name, street_number, all others)
 
-It only makes sense to enable this extension if the CiviCRM setting 'street address parsing' is checked. This setting can be found at Administer/Localization/Address Settings (or in Dutch"Beheren/Lokalisatie/Adresformaten) AND if the local language is set to Dutch (nl_NL)
+It only makes sense to enable this extension if the CiviCRM setting 'street address parsing' is checked. This setting can be found at Administer/Localization/Address Settings (or in Dutch Beheren/Lokalisatie/Adresformaten) AND if the local language is set to Dutch (nl_NL).
 Also, the assumption is that either Netherlands or Belgium is set as the default country. The parsing in Dutch format will happen only for those contacts that are located in either Netherlands or Belgium.
 
 Please note that the extension does not convert existing street_addresses in your database! It assumes you either install this extension in a 
@@ -17,10 +20,11 @@ What does it do?
 <li>It changes the sequence of the street address fields in the inline edit and edit forms from street_number, street_name and all other street fields after that to the Dutch format of street_name, street_number and all other street fields after that.
 <br /><strong>Technical</strong>
 Modified template <em>CRM/Contact/Form/Edit/Address/street_address.tpl</em>. Also, nl_NL is added as a possible language in <em>CRM/Core/BAO/Address.php</em>.
-And the hook <em>hook_civicrm_buildForm</em> is used to split and glue street_address before displaying
+Additionally, street address parsing is added to <em>CRM/Event/Form/ManageEvent/Location.php</em>.
+And the hook <em>hook_civicrm_buildForm</em> is used to split and glue street_address before displaying.
 </li>
 
-<li>It changed the way street_address is stored in the dabase to reflect the Dutch format of street_name, street_number and all other street fields after that.
+<li>It changes the way street_address is stored in the database to reflect the Dutch format of street_name, street_number and all other street fields after that.
 <br /><strong>Technical</strong>
 Implementation of <em>hook_civicrm_pre</em>
 </li>
@@ -28,7 +32,6 @@ Implementation of <em>hook_civicrm_pre</em>
 <li>There is a <strong>scheduled job</strong> called 'Parse NL and BE addresses' that will select all Dutch or Belgian addresses in the database where the <em>street_name</em> field is empty, and parse those. This will enable you to parse your addresses after an import action. The scheduled job is set to inactive when installed, you will have to make it active and then run it from the scheduled job list. You could leave it to run daily, but that should not be necessary. Advise is to set it back to inactive once it has run.
 </li>
 </ol>
-
 
 
 Future wishes
