@@ -348,7 +348,9 @@ class CRM_Core_BAO_Address extends CRM_Core_DAO_Address {
 
     $config = CRM_Core_Config::singleton();
 
-    $asp = Civi::settings()->get('address_standardization_provider');
+    /* -- START CHANGE: Changed setting code to be usable by CiviCRM <= 4.7 -- */
+    $asp = CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::ADDRESS_STANDARDIZATION_PREFERENCES_NAME, 'address_standardization_provider');
+    /* -- END CHANGE -- */
     // clean up the address via USPS web services if enabled
     if ($asp === 'USPS' &&
         $params['country_id'] == 1228
@@ -367,10 +369,10 @@ class CRM_Core_BAO_Address extends CRM_Core_DAO_Address {
 
       if ($parseStreetAddress && !empty($params['street_address'])) {
         foreach (array(
-          'street_number',
           'street_name',
-          'street_unit',
+          'street_number',
           'street_number_suffix',
+          'street_unit',
         ) as $fld) {
           unset($params[$fld]);
         }
@@ -1054,7 +1056,9 @@ SELECT is_primary,
         'first_name' => $rows[$rowID]['first_name'],
         'individual_prefix' => $rows[$rowID]['individual_prefix'],
       );
-      $format = Civi::settings()->get('display_name_format');
+      /* -- START CHANGE: Changed setting code to be usable by CiviCRM <= 4.7 -- */
+      $format = CRM_Core_BAO_Setting::getItem(CRM_Core_BAO_Setting::SYSTEM_PREFERENCES_NAME, 'display_name_format');
+      /* -- END CHANGE -- */
       $firstNameWithPrefix = CRM_Utils_Address::format($formatted, $format, FALSE, FALSE, TRUE);
       $firstNameWithPrefix = trim($firstNameWithPrefix);
 
