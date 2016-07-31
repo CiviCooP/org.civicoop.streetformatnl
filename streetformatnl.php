@@ -1,5 +1,4 @@
 <?php
-ini_set('display_errors', '1');
 require_once 'streetformatnl.civix.php';
 
 /**
@@ -46,7 +45,7 @@ function streetformatnl_civicrm_pre($op, $objectName, $objectId, &$objectRef) {
  * 
  */
 function streetformatnl_civicrm_buildForm($formName, &$form) {
-    if ( $formName == "CRM_Contact_Form_Contact" || $formName == "CRM_Contact_Form_Inline_Address") {
+    if(in_array($formName, array('CRM_Contact_Form_Contact', 'CRM_Contact_Form_Inline_Address', 'CRM_Event_Form_ManageEvent_Location'))) {
         /*
          * check if any of the addresses of the contact are in Netherlands or Belgium and
          * change the street_address sequence for those contact
