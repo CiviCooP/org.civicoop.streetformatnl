@@ -17,7 +17,7 @@
 function civicrm_api3_address_nl_parse($params) {
     ini_set('max_execution_time', 0);
 
-    if (in_array('options', $params) && in_array('limit', $params['options']) && is_numeric($params['options']['limit'])) {
+    if (array_key_exists('options', $params) && array_key_exists('limit', $params['options']) && is_numeric($params['options']['limit'])) {
       $limit = $params['options']['limit'];
     }
     $count_addresses = 0;
