@@ -20,6 +20,13 @@ function civicrm_api3_address_nl_parse($params) {
     if (array_key_exists('options', $params) && array_key_exists('limit', $params['options']) && is_numeric($params['options']['limit'])) {
       $limit = $params['options']['limit'];
     }
+    else if (array_key_exists('limit', $params) && is_numeric($params['limit'])) {
+      // Because it is not clear how to pass e.g
+      // options = {'limit': 100000}
+      // as a parameter to a scheduled task, I accept 'limit' as a parameter
+      // as well.
+      $limit = $params['limit'];
+    }
     $count_addresses = 0;
 
     // ORDER BY id DESC so that the most recent addresses are parsed first.
