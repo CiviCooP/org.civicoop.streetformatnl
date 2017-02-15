@@ -39,7 +39,7 @@ function civicrm_api3_address_nl_parse($params) {
     $params = [];
     if (!empty($limit)) {
       $query .= " LIMIT %1";
-      $params['%1'] = array($limit, 'Integer');
+      $params['1'] = array($limit, 'Integer');
     }
     $dao = CRM_Core_DAO::executeQuery($query, $params);
     while ($dao->fetch()) {
