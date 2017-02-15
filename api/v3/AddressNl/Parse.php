@@ -16,10 +16,32 @@
  */
 function civicrm_api3_address_nl_parse($params) {
     ini_set('max_execution_time', 0);
+
+    if (array_key_exists('options', $params) && array_key_exists('limit', $params['options']) && is_numeric($params['options']['limit'])) {
+      $limit = $params['options']['limit'];
+    }
+    else if (array_key_exists('limit', $params) && is_numeric($params['limit'])) {
+      // Because it is not clear how to pass e.g
+      // options = {'limit': 100000}
+      // as a parameter to a scheduled task, I accept 'limit' as a parameter
+      // as well.
+      $limit = $params['limit'];
+    }
     $count_addresses = 0;
-    $query = 
-"SELECT id, street_address FROM civicrm_address WHERE (country_id = 1152 OR country_id = 1020) AND street_name IS NULL";
-    $dao = CRM_Core_DAO::executeQuery($query);
+
+    // ORDER BY id DESC so that the most recent addresses are parsed first.
+    $query = "
+      SELECT id, street_address 
+      FROM civicrm_address 
+      WHERE street_address IS NOT NULL 
+        AND (country_id = 1152 OR country_id = 1020) 
+        AND street_name IS NULL ORDER BY id DESC";
+    $params = [];
+    if (!empty($limit)) {
+      $query .= " LIMIT %1";
+      $params['1'] = array($limit, 'Integer');
+    }
+    $dao = CRM_Core_DAO::executeQuery($query, $params);
     while ($dao->fetch()) {
         $adres_elements = _splitStreetAddressNl($dao->street_address);
         $update_fields = array();
